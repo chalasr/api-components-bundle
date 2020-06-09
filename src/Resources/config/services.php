@@ -86,6 +86,7 @@ use Silverback\ApiComponentsBundle\Helper\Form\FormSubmitHelper;
 use Silverback\ApiComponentsBundle\Helper\Publishable\PublishableStatusChecker;
 use Silverback\ApiComponentsBundle\Helper\RefererUrlResolver;
 use Silverback\ApiComponentsBundle\Helper\Route\RouteGenerator;
+use Silverback\ApiComponentsBundle\Helper\Route\RouteGeneratorInterface;
 use Silverback\ApiComponentsBundle\Helper\Timestamped\TimestampedDataPersister;
 use Silverback\ApiComponentsBundle\Helper\Uploadable\FileInfoCacheManager;
 use Silverback\ApiComponentsBundle\Helper\Uploadable\UploadableFileManager;
@@ -313,7 +314,7 @@ return static function (ContainerConfigurator $configurator) {
             [
                 new Reference(ManagerRegistry::class),
                 new Reference(TimestampedAnnotationReader::class),
-                new Reference(TimestampedDataPersister::class),
+                new Reference('silverback.helper.timestamped_data_persister'),
                 new Reference(UserEventListener::class),
                 new Reference(NormalizerInterface::class),
                 new Reference(UserDataProcessor::class),
@@ -734,7 +735,9 @@ return static function (ContainerConfigurator $configurator) {
         ->args([
             new Reference('cocur_slugify'),
             new Reference(ManagerRegistry::class),
+            new Reference('silverback.helper.timestamped_data_persister'),
         ]);
+    $services->alias(RouteGeneratorInterface::class, 'silverback.helper.route_generator');
 
     $services
         ->set(RouteRepository::class)
@@ -795,13 +798,15 @@ return static function (ContainerConfigurator $configurator) {
         ->autoconfigure(false);
 
     $services
-        ->set(TimestampedDataPersister::class)
+        ->set('silverback.helper.timestamped_data_persister')
+        ->class(TimestampedDataPersister::class)
         ->args(
             [
                 new Reference(ManagerRegistry::class),
                 new Reference(TimestampedAnnotationReader::class),
             ]
         );
+    $services->alias(TimestampedDataPersister::class, 'silverback.helper.timestamped_data_persister');
 
     $getTimestampedListenerTagArgs = static function ($event) {
         return [
@@ -975,7 +980,7 @@ return static function (ContainerConfigurator $configurator) {
                 new Reference(EntityManagerInterface::class),
                 new Reference(ValidatorInterface::class),
                 new Reference(UserRepository::class),
-                new Reference(TimestampedDataPersister::class),
+                new Reference('silverback.helper.timestamped_data_persister'),
                 new Reference(UserPasswordEncoderInterface::class),
                 '', // injected in dependency injection
             ]
