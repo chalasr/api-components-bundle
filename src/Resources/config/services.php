@@ -655,9 +655,11 @@ return static function (ContainerConfigurator $configurator) {
 
     if (class_exists(LogoutEvent::class)) {
         $services
-            ->set(LogoutListener::class)
+            ->set('silverback.security.logout_listener')
+            ->class(LogoutListener::class)
             ->args(
                 [
+                    '', // injected in dependency injection
                     '', // injected in dependency injection
                 ]
             )
@@ -668,6 +670,7 @@ return static function (ContainerConfigurator $configurator) {
             ->class(LogoutHandler::class)
             ->args(
                 [
+                    '', // injected in dependency injection
                     '', // injected in dependency injection
                 ]
             );
